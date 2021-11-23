@@ -14,7 +14,6 @@ Key Anaconda package dependencies:
 - samtools (bioconda)
 - bwa (bioconda)
 - R packages: dplyr, data.table
-- R Bioconductor packages: MEDIPS, bsgenome.hsapiens.ucsc.hg19
 
 ## Snakemake profiles
 
