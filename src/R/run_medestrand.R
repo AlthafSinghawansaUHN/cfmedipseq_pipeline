@@ -24,8 +24,9 @@ if (is.null(args[['medestrand']])) {
     devtools::load_all(args[['medestrand']])
 }
 library(GenomicRanges)
+library(MEDIPS)
 library(BSgenome.Hsapiens.UCSC.hg38)
-library(tidyr)
+library(tidyverse)
 
 
 BIN_WIDTH = 300
@@ -45,8 +46,25 @@ methylset <- MeDEStrand.createSet(
 
 CS = MeDEStrand.countCG(pattern='CG', refObj=methylset)
 
-absolute_methylation = MeDEStrand.binMethyl(MSetInput = methylset, CSet = CS, Granges = TRUE)
+absolute_methylation <- MeDEStrand.binMethyl(MSetInput = methylset, CSet = CS, Granges = FALSE)
 
-absolute_methylation_df <- as.data.frame(absolute_methylation)
+MSet = methylset[[1]]
+chr.select = MSet@chr_names
+window_size = window_size(MSet)
+chr_lengths = unname( seqlengths(BSgenome.Hsapiens.UCSC.hg38)[ seqnames(BSgenome.Hsapiens.UCSC.hg38@seqinfo)%in%chr.select ] )
+no_chr_windows = ceiling(chr_lengths/window_size)
+supersize_chr = cumsum(no_chr_windows)
+chromosomes=chr.select
+
+all.Granges.genomeVec = MEDIPS.GenomicCoordinates(supersize_chr, no_chr_windows, chromosomes, chr_lengths, window_size)
+all.Granges.genomeVec$CF = CS@genome_CF
+all.Granges.genomeVec$binMethyl= absolute_methylation
+
+absolute_methylation_df <- as.data.frame(all.Granges.genomeVec)
+colnames(absolute_methylation_df) <- c("bin_chr","bin_start","bin_end","bin_width","strand","cpg_count","bin_methyl")
+absolute_methylation_df = absolute_methylation_df[, c("bin_chr","bin_start","bin_end","cpg_count","bin_methyl")]
 
 write_tsv(absolute_methylation_df, file = args[['output']], col_names = TRUE)
+
+rm(list = ls())
+gc()
