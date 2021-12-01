@@ -9,7 +9,8 @@ for cohort in config['data']['cohorts']:
 	    break
 
 path_to_data = config['data']['base_path'] + '/' + config['data']['cohorts'][cohort]['cohort_name']
-
+b_pattern = config['data']['cohorts'][cohort]['bpattern']
+b_list = config['data']['cohorts'][cohort]['barcodes']
 
 def get_cohort_data(cohort):
     samplesheet = pd.read_csv(config['data']['cohorts'][cohort]['samplesheet'], comment='#').drop_duplicates()
@@ -46,17 +47,58 @@ def clean(command):
 
 rule all:
     input:
-        #expand(path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats.tsv', sample=get_all_samples().sample_name.unique()),
-        #expand('/cluster/projects/pughlab/projects/ezhao/pipelines/cfmedipseq_pipeline/samples/CMP-01-02-cfDNA-02/merged/bin_stats/bin_stats_fit_{method}.Rds', method=['LBFGS', 'VB', 'MCMC'])
+        #flag stats of the bam files
+        expand(
+            path_to_data + '/samples/{sample}/merged/bwa_mem/all_flagstats.txt',
+            sample = get_all_samples_list()
+        ),
+        #run MeD-ReMix
         #expand(
-        #    path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats.tsv',
+        #    path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_nbglm.tsv',
+        #    sample = get_all_samples_list()
+        #),
+        #run QSEA
+        #expand(
+        #    path_to_data + '/samples/{sample}/merged/QSEA/qsea_count_output.tsv',
+        #    sample = get_all_samples_list()
+        #),
+        #expand(
+        #    path_to_data + '/samples/{sample}/merged/QSEA/qsea_beta_output.tsv',
+        #    sample = get_all_samples_list()
+        #),
+        #expand(
+        #    path_to_data + '/samples/{sample}/merged/QSEA/QCStats_matrix.tsv',
+        #    sample = get_all_samples_list()
+        #),
+        #run MeDEStrand
+        expand(
+            path_to_data + '/samples/{sample}/merged/MeDEStrand/medestrand_output.tsv',
+            sample = get_all_samples_list()
+        ),
+        #run MEDPIS
+        expand(
+            path_to_data + '/samples/{sample}/merged/MEDIPS/medips_output.tsv',
+            sample = get_all_samples_list()
+        ),
+        ##clean intermediary libraries if they are taking up too much space
+        #expand(
+        #    path_to_data + 'samples/{sample}/libraries/bam_libs_cleaned.txt',
+        #    sample = get_all_samples_list()
+        #),        
+        #expand(
+        #    path_to_data + 'samples/{sample}/libraries/fastq_libs_cleaned.txt',
+        #    sample = get_all_samples_list()
+        #),
+        #expand(
+        #    path_to_data + 'samples/{sample}/merged/bin_stats/chrom_bin_stats_libs_cleaned.txt',
+        #    sample = get_all_samples_list()
+        #),
+        #expand(
+        #    path_to_data + 'samples/{sample}/merged/QSEA/chrom_qsea_libs_cleaned.txt',
         #    sample = get_all_samples_list()
         #)
-        expand(
-            path_to_data + '/samples/{sample}/merged/QSEA/qsea_output.tsv',
-            sample = get_all_samples_list()
-        )
 
+		
 rule set_environment:
     output:
         'environment_is_set'
@@ -71,33 +113,37 @@ rule gunzip_fastq:
         path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R{read}.fastq',
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
     shell:
-        'gunzip -dc {input} > {output}'
+        'gunzip -c {input} > {output}'
 
 rule extract_barcodes:
     input:
         R1 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R1.fastq',
         R2 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R2.fastq',
     output:
-        R1 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq',
-        R2 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq'
+        R1 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq.gz',
+        R2 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq.gz'
     params:
+        barcode_out_R1 = path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq',
+        barcode_out_R2 = path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq',
         outprefix = lambda wildcards, output: output.R1.split('_barcode_')[0],
-	    bpattern = config['paths']['bpattern'],
-	    blist = config['paths']['barcodes']
-    resources: cpus=1, mem_mb=16000, time_min='5-00:00:00'
+	    bpattern = b_pattern,
+	    blist = b_list
+    resources: cpus=1, mem_mb=16000, time_min='1-00:00:00'
     run:
 	    if params.bpattern == 'NULL':
 		    if params.blist == 'NULL':
-			    shell("cp {input.R1} {output.R1}")
-			    shell("cp {input.R2} {output.R2}")
+			    shell("gzip -c {input.R1} > {output.R1}")
+			    shell("gzip -c {input.R2} > {output.R2}")
 			    shell("rm {input.R1} {input.R2}")
 		    else:
 			    shell("python src/ConsensusCruncher/ConsensusCruncher/extract_barcodes.py --read1 {input.R1} --read2 {input.R2} --outfile {params.outprefix} --blist {params.blist}")
+			    shell("gzip {params.barcode_out_R1} {params.barcode_out_R2}")
 			    shell("rm {input.R1} {input.R2}")
 	    else:
 		    shell("python src/ConsensusCruncher/ConsensusCruncher/extract_barcodes.py --read1 {input.R1} --read2 {input.R2} --outfile {params.outprefix} --bpattern {params.bpattern} --blist {params.blist}")
+		    shell("gzip {params.barcode_out_R1} {params.barcode_out_R2}")
 		    shell("rm {input.R1} {input.R2}")
-	    
+	
 def get_read_group_from_fastq(fastq_file, sample_name):
     with gzip.open(fastq_file, 'rt') as fastq:
         header = next(fastq)
@@ -113,8 +159,8 @@ def get_read_group_from_fastq(fastq_file, sample_name):
 
 rule bwa_mem:
     input:
-        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq',
-        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq',
+        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq.gz',
+        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq.gz',
     output:
         path_to_data + '/samples/{sample}/libraries/lib_{lib}/bwa_mem/aligned.bam'
     resources: cpus=4, mem_mb=16000, time_min='72:00:00'
@@ -126,6 +172,23 @@ rule bwa_mem:
 	    bwa_index = config['paths']['bwa_index']
     shell:
         "bwa mem -M -t4 -R'{params.read_group}' {params.bwa_index} {input} | samtools view -bSo {output}"
+		
+rule clean_fastq_libs:
+    input:
+        fastq_files = lambda wildcards: expand(
+                path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq.gz',
+                lib=get_libraries_of_sample(wildcards.sample)
+        )		
+    output:
+        path_to_data + '/samples/{sample}/libraries/fastq_libs_cleaned.txt'
+    params:
+        fasq_paths = lambda wildcards: expand(
+                path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/fastq/',
+                lib=get_libraries_of_sample(wildcards.sample)
+        )
+    resources: cpus=1, mem_mb=8000, time_min='10:00:00'
+    shell:
+        "rm -r {params.fastq_paths} && touch {output}"
 
 rule bam_to_sorted_bam:
     input:
@@ -159,21 +222,22 @@ rule merge_bam:
     shell:
         'samtools merge {output} {input} && samtools index {output}'
 
-rule clean_libs:
+rule clean_bam_libs:
     input:
+        bam_files = lambda wildcards: expand(
+                path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/bwa_mem/aligned.sorted.bam',
+                lib=get_libraries_of_sample(wildcards.sample)
+        )			
+    output:
+        path_to_data + '/samples/{sample}/libraries/bam_libs_cleaned.txt'
+    params:
         bam_paths = lambda wildcards: expand(
                 path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/bwa_mem/',
                 lib=get_libraries_of_sample(wildcards.sample)
-        ),
-        fastq_paths = lambda wildcards: expand(
-                path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/fastq/',
-                lib=get_libraries_of_sample(wildcards.sample)
-        )		
-    output:
-        path_to_data + '/samples/{sample}/merged/bwa_mem/bam_libs_cleaned.txt'
+        )
     resources: cpus=1, mem_mb=8000, time_min='10:00:00'
     shell:
-        "rm -r {input.bam_paths} {input.fastq_paths} && touch {output}"
+        "rm -r {params.bam_paths} && touch {output}"
 
 rule bam_markdup:
     input:
@@ -213,7 +277,7 @@ rule bam_bin_stats:
     params:
         bsgenome = lambda wildcards:config['paths']['bsgenome'][wildcards.species],
         bsgenome_chr = lambda wildcards: get_bsgenome_chrom(wildcards.species, wildcards.chrom)
-    resources: cpus=1, mem_mb=16000, time_min='24:00:00'
+    resources: cpus=1, mem_mb=30000, time_min='24:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
         clean('''
@@ -226,7 +290,7 @@ rule bam_bin_stats:
             --bsgchr {params.bsgenome_chr}
         ''')
 
-MAJOR_HUMAN_CHROMOSOMES = ['chr' + str(i) for i in range(1, 22)] + ['chrX', 'chrY']
+MAJOR_HUMAN_CHROMOSOMES = ['chr' + str(i) for i in range(1, 23)] + ['chrX', 'chrY']
 all_chromosome_tuples = [('human', c) for c in MAJOR_HUMAN_CHROMOSOMES] + [('arabidopsis', '1'), ('arabidopsis', '3')]
 
 rule merge_bin_stats:
@@ -243,16 +307,18 @@ rule merge_bin_stats:
             else:
                 input_data.to_csv(output[0], header=False, sep='\t', index=False, mode='a')
 
-# Below is the full bayesian approach for fitting, which remains under development
-rule fit_bin_stats:
+rule clean_chrom_bin_stats_libs:
     input:
-        path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats.tsv'
+        binstat=path_to_data + '/samples/{sample}/merged/bin_stats/by_chromosome/bin_stats_{species}_{chrom}.tsv',
+        filtered=path_to_data + '/samples/{sample}/merged/bin_stats/filtered_out/bin_stats_{species}_{chrom}.tsv'	
     output:
-        path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_{method}.Rds'
-    resources: cpus=1, mem_mb=30000, time_min='5-00:00:00'
-    conda: 'conda_env/cfmedip_r.yml'
+        path_to_data + '/samples/{sample}/merged/bin_stats/chrom_bin_stats_libs_cleaned.txt'
+    params:
+        binstat = path_to_data + '/samples/{sample}/merged/bin_stats/by_chromosome',
+        filtered = path_to_data + '/samples/{sample}/merged/bin_stats/filtered_out'	
+    resources: cpus=1, mem_mb=8000, time_min='10:00:00'
     shell:
-        'Rscript src/R/fit_cpg_bins.R -i {input} -o {output} --method {wildcards.method}'
+        "rm -r {params.binstat} {params.filtered} && touch {output}"
 
 # This is the currently used negative binomial GLM approach to fitting
 rule cfmedip_nbglm:
@@ -266,17 +332,106 @@ rule cfmedip_nbglm:
     shell:
         'Rscript src/R/cfmedip_nbglm.R -i {input} -o {output.fit} --modelout {output.model}'
 
-rule run_QSEA_MEDIPSQC:
+rule run_QSEA:
     input:
-        path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.bam'
+        path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam'
     output:
-	    path_to_data + '/samples/{sample}/merged/QSEA/qsea_output.tsv'
+        qsea_count=path_to_data + '/samples/{sample}/merged/QSEA/by_chromosome/qsea_count_{chrom}_output.tsv',
+        qsea_beta=path_to_data + '/samples/{sample}/merged/QSEA/by_chromosome/qsea_beta_{chrom}_output.tsv',
+        qsea_qc=path_to_data + '/samples/{sample}/merged/QSEA/by_chromosome/QCStats_{chrom}_matrix.tsv'
     params:
-	    qc_out = path_to_data + '/samples/{sample}/merged/QSEA/'
-    resources: cpus=4, mem_mb=30000, time_min='5-00:00:00'
+        out = path_to_data + '/samples/{sample}/merged/QSEA/by_chromosome/'
+    resources: cpus=4, mem_mb=30000, time_min='3-00:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
-	    'Rscript src/R/run_QSEA_MEDIPSQC.R -s {wildcards.sample} -b {input} -o {output} -qc {params.qc_out}'
+	    'Rscript src/R/run_QSEA.R -s {wildcards.sample} -c {wildcards.chrom} -b {input} -o {params.out} --count {output.qsea_count} --beta {output.qsea_beta} --qc {output.qsea_qc}'
+
+rule merge_QSEA_count:
+    input:
+        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/qsea_count_{chrom}_output.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES],
+    output:
+        path_to_data + '/samples/{sample}/merged/QSEA/qsea_count_output.tsv'
+    resources: cpus=1, mem_mb=8000, time_min='24:00:00'
+    run:
+        for i, input_file in enumerate(input):
+            input_data = pd.read_csv(input_file, delimiter='\t', comment='#')
+            if i == 0:
+                input_data.to_csv(output[0], header=True, sep='\t', index=False)
+            else:
+                input_data.to_csv(output[0], header=False, sep='\t', index=False, mode='a')
+
+rule merge_QSEA_beta:
+    input:
+        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/qsea_beta_{chrom}_output.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES],
+    output:
+        path_to_data + '/samples/{sample}/merged/QSEA/qsea_beta_output.tsv'
+    resources: cpus=1, mem_mb=8000, time_min='24:00:00'
+    run:
+        for i, input_file in enumerate(input):
+            input_data = pd.read_csv(input_file, delimiter='\t', comment='#')
+            if i == 0:
+                input_data.to_csv(output[0], header=True, sep='\t', index=False)
+            else:
+                input_data.to_csv(output[0], header=False, sep='\t', index=False, mode='a')
+
+rule merge_QSEA_QCStats:
+    input:
+        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/QCStats_{chrom}_matrix.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES],
+    output:
+        path_to_data + '/samples/{sample}/merged/QSEA/QCStats_matrix.tsv'
+    resources: cpus=1, mem_mb=8000, time_min='24:00:00'
+    run:
+        for i, input_file in enumerate(input):
+            input_data = pd.read_csv(input_file, delimiter='\t', comment='#')
+            if i == 0:
+                input_data.to_csv(output[0], header=True, sep='\t', index=False)
+            else:
+                input_data.to_csv(output[0], header=False, sep='\t', index=False, mode='a')
+
+rule clean_chrom_qsea_libs:
+    input:
+        path_to_data + '/samples/{sample}/merged/QSEA/by_chromosome/QCStats_matrix.tsv'
+    output:
+        path_to_data + '/samples/{sample}/merged/QSEA/chrom_qsea_libs_cleaned.txt'
+    params:
+        chrom_paths = path_to_data + '/samples/{sample}/merged/QSEA/by_chromosome/'
+    resources: cpus=1, mem_mb=8000, time_min='10:00:00'
+    shell:
+        "rm -r {params.chrom_paths} && touch {output}"
+
+rule run_MEDIPS:
+    input:
+        path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam'
+    output:
+        medips_count=path_to_data + '/samples/{sample}/merged/MEDIPS/medips_output.tsv',
+        medips_qc=path_to_data + '/samples/{sample}/merged/MEDIPS/QCStats_matrix.tsv'
+    resources: cpus=1, mem_mb=30000, time_min='5-00:00:00'
+    conda: 'conda_env/cfmedip_r.yml'
+    shell:
+	    'Rscript src/R/run_MEDIPS.R -b {input} -o {output.medips_count} -q {output.medips_qc}'
+
+rule run_medestrand:
+    input:
+        path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam'
+    output:
+        path_to_data + '/samples/{sample}/merged/MeDEStrand/medestrand_output.tsv'
+    params:
+        medestrand = config['paths']['dependencies']['medestrand_path']
+    resources: cpus=1, mem_mb=30000, time_min='5-00:00:00'
+    conda: 'conda_env/cfmedip_r.yml'
+    shell:
+        'Rscript src/R/run_medestrand.R -b {input} -o {output} -m {params.medestrand}'
+
+# Below is the full bayesian approach for fitting, which remains under development
+rule fit_bin_stats:
+    input:
+        path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats.tsv'
+    output:
+        path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_{method}.Rds'
+    resources: cpus=1, mem_mb=30000, time_min='5-00:00:00'
+    conda: 'conda_env/cfmedip_r.yml'
+    shell:
+        'Rscript src/R/fit_cpg_bins.R -i {input} -o {output} --method {wildcards.method}'
 
 rule cfmedip_array_positions:
     input:
@@ -288,16 +443,6 @@ rule cfmedip_array_positions:
     conda: 'conda_env/cfmedip_r.yml'
     shell:
         'Rscript ~/git/cfMeDIP-seq-analysis-pipeline/src/R/cfmedip_to_array_sites.R -c {input.fit} -m {input.manifest} -o {output}'
-
-rule run_medestrand:
-    input:
-        path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.bam'
-    output:
-        path_to_data + '/samples/{sample}/merged/medestrand/medestrand_output.Rds',
-    resources: cpus=1, mem_mb=30000, time_min='5-00:00:00'
-    conda: 'conda_env/cfmedip_r.yml'
-    shell:
-        'Rscript src/R/run_medestrand.R -b {{input}} -o {{output}} -m {}'.format(config['paths']['dependencies']['medestrand_path'])
 
 rule tcga_tissue_signature:
     input:
