@@ -21,10 +21,6 @@ For a guide on how to create a Snakemake profile for your cluster setup, see htt
 
 Create a slurm_log directory when running snakemake to place log files based on the out location of the config.yaml, example config.yaml is provided as snakemake_slurm_config.yaml
 
-# Setup Notes
-
-- `GenomeInfoDb` and `GenomeInfoDbData` were not properly installed by conda. Installed these after the fact with BiocManager.
-
 # Running
 
 To run the pipeline on SLURM, submit the launch.sh file with `sbatch launch.sh`.
