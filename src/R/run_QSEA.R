@@ -20,7 +20,7 @@ Options:
 
 if (! interactive()) {
   library(docopt)
-  args <- docopt(doc, version='Running QSEA')
+  args <- docopt(doc, version='Run QSEA v 1.0')
   print(args)
 } else {
   message('Running in interactive mode. Be sure to specify args manually.')

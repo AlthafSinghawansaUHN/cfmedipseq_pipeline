@@ -1,5 +1,5 @@
 ' consolidate_cohort_samples.R
-Fit bins from cfMeDIP-seq data using negative binomial regression.
+Consolidate the cohorts output samples into a single table of samples
 
 Usage:
     compile_cohort_samples.R -i INPUT -o OUTPUT -d DATA
