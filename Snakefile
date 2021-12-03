@@ -75,26 +75,30 @@ rule all:
             path_to_data + '/samples/{sample}/merged/MeDEStrand/medestrand_output.tsv',
             sample = get_all_samples_list()
         ),
+        #consolidate
+        path_to_data + '/MeDEStrand/MeDEStrand_AbsMethyl.tsv',
         #run MEDPIS
         expand(
             path_to_data + '/samples/{sample}/merged/MEDIPS/medips_output.tsv',
             sample = get_all_samples_list()
         ),
-        ##clean intermediary libraries if they are taking up too much space
+        #consolidate
+        path_to_data + '/MEDIPS/MEDIPS_Counts.tsv',
+        ##clean intermediary libraries if they are taking up too much space      
         #expand(
-        #    path_to_data + 'samples/{sample}/libraries/bam_libs_cleaned.txt',
-        #    sample = get_all_samples_list()
-        #),        
-        #expand(
-        #    path_to_data + 'samples/{sample}/libraries/fastq_libs_cleaned.txt',
+        #    path_to_data + '/samples/{sample}/libraries/fastq_libs_cleaned.txt',
         #    sample = get_all_samples_list()
         #),
         #expand(
-        #    path_to_data + 'samples/{sample}/merged/bin_stats/chrom_bin_stats_libs_cleaned.txt',
+        #    path_to_data + '/samples/{sample}/libraries/bam_libs_cleaned.txt',
+        #    sample = get_all_samples_list()
+        #),  
+        #expand(
+        #    path_to_data + '/samples/{sample}/merged/bin_stats/chrom_bin_stats_libs_cleaned.txt',
         #    sample = get_all_samples_list()
         #),
         #expand(
-        #    path_to_data + 'samples/{sample}/merged/QSEA/chrom_qsea_libs_cleaned.txt',
+        #    path_to_data + '/samples/{sample}/merged/QSEA/chrom_qsea_libs_cleaned.txt',
         #    sample = get_all_samples_list()
         #)
 
@@ -130,8 +134,8 @@ rule extract_barcodes:
 	    blist = b_list
     resources: cpus=1, mem_mb=16000, time_min='1-00:00:00'
     run:
-	    if params.bpattern == 'NULL':
-		    if params.blist == 'NULL':
+	    if params.bpattern is None:
+		    if params.blist is None:
 			    shell("gzip -c {input.R1} > {output.R1}")
 			    shell("gzip -c {input.R2} > {output.R2}")
 			    shell("rm {input.R1} {input.R2}")
@@ -174,15 +178,10 @@ rule bwa_mem:
         "bwa mem -M -t4 -R'{params.read_group}' {params.bwa_index} {input} | samtools view -bSo {output}"
 		
 rule clean_fastq_libs:
-    input:
-        fastq_files = lambda wildcards: expand(
-                path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq.gz',
-                lib=get_libraries_of_sample(wildcards.sample)
-        )		
     output:
         path_to_data + '/samples/{sample}/libraries/fastq_libs_cleaned.txt'
     params:
-        fasq_paths = lambda wildcards: expand(
+        fastq_paths = lambda wildcards: expand(
                 path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/fastq/',
                 lib=get_libraries_of_sample(wildcards.sample)
         )
@@ -222,12 +221,7 @@ rule merge_bam:
     shell:
         'samtools merge {output} {input} && samtools index {output}'
 
-rule clean_bam_libs:
-    input:
-        bam_files = lambda wildcards: expand(
-                path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/bwa_mem/aligned.sorted.bam',
-                lib=get_libraries_of_sample(wildcards.sample)
-        )			
+rule clean_bam_libs:		
     output:
         path_to_data + '/samples/{sample}/libraries/bam_libs_cleaned.txt'
     params:
@@ -308,9 +302,6 @@ rule merge_bin_stats:
                 input_data.to_csv(output[0], header=False, sep='\t', index=False, mode='a')
 
 rule clean_chrom_bin_stats_libs:
-    input:
-        binstat=path_to_data + '/samples/{sample}/merged/bin_stats/by_chromosome/bin_stats_{species}_{chrom}.tsv',
-        filtered=path_to_data + '/samples/{sample}/merged/bin_stats/filtered_out/bin_stats_{species}_{chrom}.tsv'	
     output:
         path_to_data + '/samples/{sample}/merged/bin_stats/chrom_bin_stats_libs_cleaned.txt'
     params:
@@ -389,8 +380,6 @@ rule merge_QSEA_QCStats:
                 input_data.to_csv(output[0], header=False, sep='\t', index=False, mode='a')
 
 rule clean_chrom_qsea_libs:
-    input:
-        path_to_data + '/samples/{sample}/merged/QSEA/by_chromosome/QCStats_matrix.tsv'
     output:
         path_to_data + '/samples/{sample}/merged/QSEA/chrom_qsea_libs_cleaned.txt'
     params:
@@ -422,6 +411,41 @@ rule run_medestrand:
     shell:
         'Rscript src/R/run_medestrand.R -b {input} -o {output} -m {params.medestrand}'
 
+rule consolidate_cohort_MEDIPS:
+    input:
+        expand(
+            path_to_data + '/samples/{sample}/merged/MEDIPS/medips_output.tsv',
+            sample = get_all_samples_list()
+        )
+    output:
+        path_to_data + '/MEDIPS/MEDIPS_Counts.tsv',
+        path_to_data + '/MEDIPS/MEDIPS_CPM.tsv'
+    params:
+        data = 'MEDIPS',
+        out_path = path_to_data + '/MEDIPS/',
+        cohort_path = path_to_data
+    resources: cpus=1, mem_mb=30000, time_min='24:00:00'
+    conda: 'conda_env/cfmedip_r.yml'
+    shell:
+	    'Rscript src/R/consolidate_cohort_samples.R -i {params.cohort_path} -o {params.out_path} -d {params.data}'
+
+rule consolidate_cohort_MeDEStrand:
+    input:
+        expand(
+            path_to_data + '/samples/{sample}/merged/MeDEStrand/medestrand_output.tsv',
+            sample = get_all_samples_list()
+        )
+    output:
+        path_to_data + '/MeDEStrand/MeDEStrand_AbsMethyl.tsv'
+    params:
+        data = 'MeDEStrand',
+        out_path = path_to_data + '/MeDEStrand/',
+        cohort_path = path_to_data
+    resources: cpus=1, mem_mb=30000, time_min='24:00:00'
+    conda: 'conda_env/cfmedip_r.yml'
+    shell:
+	    'Rscript src/R/consolidate_cohort_samples.R -i {params.cohort_path} -o {params.out_path} -d {params.data}'
+
 # Below is the full bayesian approach for fitting, which remains under development
 rule fit_bin_stats:
     input:
@@ -432,57 +456,3 @@ rule fit_bin_stats:
     conda: 'conda_env/cfmedip_r.yml'
     shell:
         'Rscript src/R/fit_cpg_bins.R -i {input} -o {output} --method {wildcards.method}'
-
-rule cfmedip_array_positions:
-    input:
-        fit=path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_nbglm.tsv',
-        manifest='data/methylation_array_manifest/{array}.hg38.manifest.tsv'
-    output:
-        path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_{array}_positions.tsv',
-    resources: cpus=1, mem_mb=16000, time_min='5-00:00:00'
-    conda: 'conda_env/cfmedip_r.yml'
-    shell:
-        'Rscript ~/git/cfMeDIP-seq-analysis-pipeline/src/R/cfmedip_to_array_sites.R -c {input.fit} -m {input.manifest} -o {output}'
-
-rule tcga_tissue_signature:
-    input:
-        ancient('/cluster/projects/pughlab/projects/ezhao/data/TCGA/download/methylation/450k/TCGA-COAD')
-    output:
-        '/cluster/projects/pughlab/projects/ezhao/projects/COMPARISON/output/signatures/tcga_coad_matrix.Rds'
-    resources: cpus=1, mem_mb=16000, time_min='5-00:00:00'
-    shell:
-        'Rscript src/methylation_signatures/tcga_colorectal_signature.R -t {input} -o {output}'
-
-rule bam_to_wig:
-    input:
-        path_to_data + '/samples/{sample}/bwa_mem/aligned.sorted.markdup.bam',
-    output:
-        path_to_data + '/samples/{sample}/bin_metrics/COUNTwiggle.wig.txt',
-    resources: mem_mb=30000, time_min='72:00:00'
-    conda: 'conda_env/cfmedip_r.yml'
-    shell:
-        clean(r'''
-        Rscript src/bam_to_wig.R -b {input} -o {output}
-        ''')
-
-rule bam_to_binmethyl:
-    input:
-        path_to_data + '/samples/{sample}/bwa_mem/aligned.sorted.markdup.bam',
-    output:
-        path_to_data + '/samples/{sample}/bin_metrics/medestrand.binmethyl.txt',
-    resources: mem_mb=30000, time_min='72:00:00'
-    conda: 'conda_env/cfmedip_r.yml'
-    shell:
-        clean(r'''
-        Rscript src/correct_cpg.R -b {input} -o {output}
-        ''')
-
-rule binmethyl_to_wig:
-    input:
-        binmethyl=path_to_data + '/samples/{sample}/bin_metrics/medestrand.binmethyl.txt',
-        wig=path_to_data + '/samples/{sample}/bin_metrics/COUNTwiggle.wig.txt'
-    output:
-        path_to_data + '/samples/{sample}/bin_metrics/medestrand.binmethyl.wig',
-    conda: 'conda_env/cfmedip_r.yml'
-    shell:
-        'Rscript src/binmethyl_to_wig.R -b {input.binmethyl} -m {input.wig} -o {output}'
