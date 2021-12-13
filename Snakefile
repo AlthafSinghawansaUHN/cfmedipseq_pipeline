@@ -6,7 +6,7 @@ configfile: "config.yml"
 
 for cohort in config['data']['cohorts']:
     if config['data']['cohorts'][cohort]['active']:
-	    break
+        break
 
 path_to_data = config['data']['base_path'] + '/' + config['data']['cohorts'][cohort]['cohort_name']
 b_pattern = config['data']['cohorts'][cohort]['bpattern']
@@ -15,7 +15,7 @@ b_list = config['data']['cohorts'][cohort]['barcodes']
 def get_cohort_data(cohort):
     samplesheet = pd.read_csv(config['data']['cohorts'][cohort]['samplesheet'], comment='#').drop_duplicates()
     samplesheet = samplesheet.sort_values(by=['sample_name', 'read_in_pair'])
-    return(samplesheet)
+    return samplesheet
 
 def get_fastq_path(sample, library, read_in_pair=1):
     library = int(library)
@@ -25,7 +25,7 @@ def get_fastq_path(sample, library, read_in_pair=1):
         (all_samples.library_index == library) &
         (all_samples.read_in_pair == read_in_pair)
     ]
-    return(sample_line.path.to_list()[0])
+    return sample_line.path.to_list()[0]
 
 def get_all_samples():
     all_samples = pd.concat([
@@ -34,16 +34,16 @@ def get_all_samples():
         in config['data']['cohorts']
         if config['data']['cohorts'][cohort_name]['active']
         ])
-    return(all_samples)
+    return all_samples
 
 def get_all_samples_list():
-    return(get_all_samples().sample_name.unique().tolist())
+    return get_all_samples().sample_name.unique().tolist()
 
 def clean(command):
     command = command.replace('\n', ' ').replace('\t', ' ')
     while '  ' in command:
         command = command.replace('  ', ' ')
-    return(command.strip())
+    return command.strip()
 
 rule all:
     input:
@@ -53,7 +53,7 @@ rule all:
             sample = get_all_samples_list()
         ),
         path_to_data + '/flagstats/flag_stats.tsv',
-        run MeD-ReMix
+        #run MeD-ReMix
         expand(
             path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_nbglm.tsv',
             sample = get_all_samples_list()
@@ -85,7 +85,7 @@ rule all:
         ),
         #consolidate
         path_to_data + '/MEDIPS/MEDIPS_Counts.tsv',
-        ##clean intermediary libraries if they are taking up too much space      
+        ##clean intermediary libraries if they are taking up too much space
         #expand(
         #    path_to_data + '/samples/{sample}/libraries/fastq_libs_cleaned.txt',
         #    sample = get_all_samples_list()
@@ -93,7 +93,7 @@ rule all:
         #expand(
         #    path_to_data + '/samples/{sample}/libraries/bam_libs_cleaned.txt',
         #    sample = get_all_samples_list()
-        #),  
+        #),
         #expand(
         #    path_to_data + '/samples/{sample}/merged/bin_stats/chrom_bin_stats_libs_cleaned.txt',
         #    sample = get_all_samples_list()
@@ -103,7 +103,7 @@ rule all:
         #    sample = get_all_samples_list()
         #)
 
-		
+
 rule set_environment:
     output:
         'environment_is_set'
@@ -113,9 +113,9 @@ rule set_environment:
 
 rule gunzip_fastq:
     input:
-        lambda wildcards: get_fastq_path(wildcards.sample, int(wildcards.lib), int(wildcards.read)),
+        lambda wildcards: get_fastq_path(wildcards.sample, int(wildcards.lib), int(wildcards.read))
     output:
-        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R{read}.fastq',
+        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R{read}.fastq'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
     shell:
         'gunzip -c {input} > {output}'
@@ -123,7 +123,7 @@ rule gunzip_fastq:
 rule extract_barcodes:
     input:
         R1 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R1.fastq',
-        R2 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R2.fastq',
+        R2 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/R2.fastq'
     output:
         R1 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq.gz',
         R2 =    path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq.gz'
@@ -135,20 +135,20 @@ rule extract_barcodes:
         blist = b_list
     resources: cpus=1, mem_mb=16000, time_min='1-00:00:00'
     run:
-	    if params.bpattern is None:
-		    if params.blist is None:
-			    shell("gzip -c {input.R1} > {output.R1}")
-			    shell("gzip -c {input.R2} > {output.R2}")
-			    shell("rm {input.R1} {input.R2}")
-		    else:
-			    shell("python src/ConsensusCruncher/ConsensusCruncher/extract_barcodes.py --read1 {input.R1} --read2 {input.R2} --outfile {params.outprefix} --blist {params.blist}")
-			    shell("gzip {params.barcode_out_R1} {params.barcode_out_R2}")
-			    shell("rm {input.R1} {input.R2}")
-	    else:
-		    shell("python src/ConsensusCruncher/ConsensusCruncher/extract_barcodes.py --read1 {input.R1} --read2 {input.R2} --outfile {params.outprefix} --bpattern {params.bpattern} --blist {params.blist}")
-		    shell("gzip {params.barcode_out_R1} {params.barcode_out_R2}")
-		    shell("rm {input.R1} {input.R2}")
-	
+        if params.bpattern is None:
+            if params.blist is None:
+                shell("gzip -c {input.R1} > {output.R1}")
+                shell("gzip -c {input.R2} > {output.R2}")
+                shell("rm {input.R1} {input.R2}")
+            else:
+                shell("python src/ConsensusCruncher/ConsensusCruncher/extract_barcodes.py --read1 {input.R1} --read2 {input.R2} --outfile {params.outprefix} --blist {params.blist}")
+                shell("gzip {params.barcode_out_R1} {params.barcode_out_R2}")
+                shell("rm {input.R1} {input.R2}")
+        else:
+            shell("python src/ConsensusCruncher/ConsensusCruncher/extract_barcodes.py --read1 {input.R1} --read2 {input.R2} --outfile {params.outprefix} --bpattern {params.bpattern} --blist {params.blist}")
+            shell("gzip {params.barcode_out_R1} {params.barcode_out_R2}")
+            shell("rm {input.R1} {input.R2}")
+
 def get_read_group_from_fastq(fastq_file, sample_name):
     with gzip.open(fastq_file, 'rt') as fastq:
         header = next(fastq)
@@ -174,10 +174,10 @@ rule bwa_mem:
             fastq_file = get_fastq_path(wildcards.sample, wildcards.lib),
             sample_name = wildcards.sample
         ),
-	    bwa_index = config['paths']['bwa_index']
+        bwa_index = config['paths']['bwa_index']
     shell:
         "bwa mem -M -t4 -R'{params.read_group}' {params.bwa_index} {input} | samtools view -bSo {output}"
-		
+
 rule clean_fastq_libs:
     output:
         path_to_data + '/samples/{sample}/libraries/fastq_libs_cleaned.txt'
@@ -248,14 +248,14 @@ rule bam_markdup:
 rule bam_flagstats:
     input:
         all = path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.bam',
-	    deduped = path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam'
+        deduped = path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam'
     output:
         all=path_to_data + '/samples/{sample}/merged/bwa_mem/all_flagstats.txt',
-	    deduped=path_to_data + '/samples/{sample}/merged/bwa_mem/deduped_flagstats.txt'
+        deduped=path_to_data + '/samples/{sample}/merged/bwa_mem/deduped_flagstats.txt'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
     shell:
         "samtools flagstat {input.all} > {output.all} && samtools flagstat {input.deduped} > {output.deduped}"
-		
+
 def get_bsgenome_chrom(species, chrom):
     chrom_map = {'1': 'Chr1', '3': 'Chr3'}
     if species == 'human':
@@ -307,7 +307,7 @@ rule clean_chrom_bin_stats_libs:
         path_to_data + '/samples/{sample}/merged/bin_stats/chrom_bin_stats_libs_cleaned.txt'
     params:
         binstat = path_to_data + '/samples/{sample}/merged/bin_stats/by_chromosome',
-        filtered = path_to_data + '/samples/{sample}/merged/bin_stats/filtered_out'	
+        filtered = path_to_data + '/samples/{sample}/merged/bin_stats/filtered_out'
     resources: cpus=1, mem_mb=8000, time_min='10:00:00'
     shell:
         "rm -r {params.binstat} {params.filtered} && touch {output}"
@@ -336,7 +336,7 @@ rule run_QSEA:
     resources: cpus=4, mem_mb=30000, time_min='3-00:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
-	    'Rscript src/R/run_QSEA.R -s {wildcards.sample} -c {wildcards.chrom} -b {input} -o {params.out} --count {output.qsea_count} --beta {output.qsea_beta} --qc {output.qsea_qc}'
+        'Rscript src/R/run_QSEA.R -s {wildcards.sample} -c {wildcards.chrom} -b {input} -o {params.out} --count {output.qsea_count} --beta {output.qsea_beta} --qc {output.qsea_qc}'
 
 rule merge_QSEA_count:
     input:
@@ -398,7 +398,7 @@ rule run_MEDIPS:
     resources: cpus=1, mem_mb=30000, time_min='5-00:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
-	    'Rscript src/R/run_MEDIPS.R -b {input} -o {output.medips_count} -q {output.medips_qc}'
+        'Rscript src/R/run_MEDIPS.R -b {input} -o {output.medips_count} -q {output.medips_qc}'
 
 rule run_medestrand:
     input:
@@ -428,7 +428,7 @@ rule consolidate_cohort_MEDIPS:
     resources: cpus=1, mem_mb=30000, time_min='24:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
-	    'Rscript src/R/consolidate_cohort_samples.R -i {params.cohort_path} -o {params.out_path} -d {params.data}'
+        'Rscript src/R/consolidate_cohort_samples.R -i {params.cohort_path} -o {params.out_path} -d {params.data}'
 
 rule consolidate_cohort_MeDEStrand:
     input:
@@ -445,7 +445,7 @@ rule consolidate_cohort_MeDEStrand:
     resources: cpus=1, mem_mb=30000, time_min='24:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
-	    'Rscript src/R/consolidate_cohort_samples.R -i {params.cohort_path} -o {params.out_path} -d {params.data}'
+        'Rscript src/R/consolidate_cohort_samples.R -i {params.cohort_path} -o {params.out_path} -d {params.data}'
 
 rule consolidate_cohort_duplication_rate:
     input:
@@ -465,7 +465,7 @@ rule consolidate_cohort_duplication_rate:
     resources: cpus=1, mem_mb=30000, time_min='24:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
-	    'Rscript src/R/get_duplication_rate.R -i {params.cohort_path} -o {params.out_path}'
+        'Rscript src/R/get_duplication_rate.R -i {params.cohort_path} -o {params.out_path}'
 
 # Below is the full bayesian approach for fitting, which remains under development
 rule fit_bin_stats:
