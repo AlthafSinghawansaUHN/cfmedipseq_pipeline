@@ -12,7 +12,9 @@
 #SBATCH --mail-user=althaf.singhawansa@uhnresearch.ca
 
 #/cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/Justin_HN_Norm_cfDNA_PBL/MEDIPSQC
+#/cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/Justin_HN_Norm_cfDNA_PBL/MEDIPSQC/bamMEDIPSQC
 #/cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/OCTANE/MEDIPSQC
+#/cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/OCTANE/MEDIPSQC/bamMEDIPSQC
 
 module load R
-Rscript MEDIPS_QC_2Table.R $1
+Rscript MEDIPS_QC_2Table.R $1 $2

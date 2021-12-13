@@ -109,4 +109,11 @@ echo -e "R CMD BATCH ${sample}_MEDIPS_QC.R  ${sample}_MEDIPS_QC.Rout" >> $qsubDi
 
 done
 
+cd $qsubDir
 
+for i in *.sh
+do
+
+sbatch $i
+
+done
