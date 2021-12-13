@@ -52,11 +52,12 @@ rule all:
             path_to_data + '/samples/{sample}/merged/bwa_mem/all_flagstats.txt',
             sample = get_all_samples_list()
         ),
-        #run MeD-ReMix
-        #expand(
-        #    path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_nbglm.tsv',
-        #    sample = get_all_samples_list()
-        #),
+        path_to_data + '/flagstats/flag_stats.tsv',
+        run MeD-ReMix
+        expand(
+            path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_nbglm.tsv',
+            sample = get_all_samples_list()
+        ),
         #run QSEA
         #expand(
         #    path_to_data + '/samples/{sample}/merged/QSEA/qsea_count_output.tsv',
@@ -445,6 +446,26 @@ rule consolidate_cohort_MeDEStrand:
     conda: 'conda_env/cfmedip_r.yml'
     shell:
 	    'Rscript src/R/consolidate_cohort_samples.R -i {params.cohort_path} -o {params.out_path} -d {params.data}'
+
+rule consolidate_cohort_duplication_rate:
+    input:
+        all = expand(
+            path_to_data + '/samples/{sample}/merged/bwa_mem/all_flagstats.txt',
+            sample = get_all_samples_list()
+        ),
+        deduped = expand(
+            path_to_data + '/samples/{sample}/merged/bwa_mem/deduped_flagstats.txt',
+            sample = get_all_samples_list()
+        )
+    output:
+        path_to_data + '/flagstats/flag_stats.tsv'
+    params:
+        out_path = path_to_data + '/flagstats/',
+        cohort_path = path_to_data
+    resources: cpus=1, mem_mb=30000, time_min='24:00:00'
+    conda: 'conda_env/cfmedip_r.yml'
+    shell:
+	    'Rscript src/R/get_duplication_rate.R -i {params.cohort_path} -o {params.out_path}'
 
 # Below is the full bayesian approach for fitting, which remains under development
 rule fit_bin_stats:
