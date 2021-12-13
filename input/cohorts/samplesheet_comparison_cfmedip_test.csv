@@ -1,0 +1,9 @@
+sample_name,library_index,read_in_pair,path
+4518_Norm_testsample,1,1,/cluster/projects/scottgroup/people/althaf/data/testsample/4518_Norm_testsample_R1.fastq.gz
+4518_Norm_testsample,1,2,/cluster/projects/scottgroup/people/althaf/data/testsample/4518_Norm_testsample_R2.fastq.gz
+4427_Norm_testsample,1,1,/cluster/projects/scottgroup/people/althaf/data/testsample/4427_Norm_testsample_R1.fastq.gz
+4427_Norm_testsample,1,2,/cluster/projects/scottgroup/people/althaf/data/testsample/4427_Norm_testsample_R2.fastq.gz
+2464_BL_S3_L002_testsample,1,1,/cluster/projects/scottgroup/people/althaf/data/testsample/2464_BL_S3_L002_R1_001.fastq.gz
+2464_BL_S3_L002_testsample,1,2,/cluster/projects/scottgroup/people/althaf/data/testsample/2464_BL_S3_L002_R2_001.fastq.gz
+HNC_4623_Norm_PBL_S21_L008_testsample,1,1,/cluster/projects/scottgroup/people/althaf/data/testsample/HNC_4623_Norm_PBL_S21_L008_R1_001.fastq.gz
+HNC_4623_Norm_PBL_S21_L008_testsample,1,2,/cluster/projects/scottgroup/people/althaf/data/testsample/HNC_4623_Norm_PBL_S21_L008_R2_001.fastq.gz
