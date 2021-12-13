@@ -12,8 +12,8 @@ path_to_data = config['data']['base_path'] + '/' + config['data']['cohorts'][coh
 b_pattern = config['data']['cohorts'][cohort]['bpattern']
 b_list = config['data']['cohorts'][cohort]['barcodes']
 
-def get_cohort_data(cohort):
-    samplesheet = pd.read_csv(config['data']['cohorts'][cohort]['samplesheet'], comment='#').drop_duplicates()
+def get_cohort_data(cohort_name):
+    samplesheet = pd.read_csv(config['data']['cohorts'][cohort_name]['samplesheet'], comment='#').drop_duplicates()
     samplesheet = samplesheet.sort_values(by=['sample_name', 'read_in_pair'])
     return samplesheet
 
@@ -160,12 +160,12 @@ def get_read_group_from_fastq(fastq_file, sample_name):
             sample = sample_name,
             lib_value = lib_value
         )
-        return(rg_line)
+        return rg_line
 
 rule bwa_mem:
     input:
         path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq.gz',
-        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq.gz',
+        path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq.gz'
     output:
         path_to_data + '/samples/{sample}/libraries/lib_{lib}/bwa_mem/aligned.bam'
     resources: cpus=4, mem_mb=16000, time_min='72:00:00'
@@ -215,7 +215,7 @@ rule merge_bam:
         lambda wildcards: expand(
                 path_to_data + '/samples/' + wildcards.sample + '/libraries/lib_{lib}/bwa_mem/aligned.sorted.bam',
                 lib=get_libraries_of_sample(wildcards.sample)
-        ),
+        )
     output:
         path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.bam'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
@@ -259,16 +259,16 @@ rule bam_flagstats:
 def get_bsgenome_chrom(species, chrom):
     chrom_map = {'1': 'Chr1', '3': 'Chr3'}
     if species == 'human':
-        return(chrom)
+        return chrom
     elif species == 'arabidopsis':
-        return(chrom_map[chrom])
+        return chrom_map[chrom]
 
 rule bam_bin_stats:
     input:
-        path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam',
+        path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam'
     output:
         binstat=path_to_data + '/samples/{sample}/merged/bin_stats/by_chromosome/bin_stats_{species}_{chrom}.tsv',
-        filtered=path_to_data + '/samples/{sample}/merged/bin_stats/filtered_out/bin_stats_{species}_{chrom}.tsv',
+        filtered=path_to_data + '/samples/{sample}/merged/bin_stats/filtered_out/bin_stats_{species}_{chrom}.tsv'
     params:
         bsgenome = lambda wildcards:config['paths']['bsgenome'][wildcards.species],
         bsgenome_chr = lambda wildcards: get_bsgenome_chrom(wildcards.species, wildcards.chrom)
@@ -290,7 +290,7 @@ all_chromosome_tuples = [('human', c) for c in MAJOR_HUMAN_CHROMOSOMES] + [('ara
 
 rule merge_bin_stats:
     input:
-        [path_to_data + '/samples/{{sample}}/merged/bin_stats/by_chromosome/bin_stats_{species}_{chrom}.tsv'.format(species=a[0], chrom=a[1]) for a in all_chromosome_tuples],
+        [path_to_data + '/samples/{{sample}}/merged/bin_stats/by_chromosome/bin_stats_{species}_{chrom}.tsv'.format(species=a[0], chrom=a[1]) for a in all_chromosome_tuples]
     output:
         path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats.tsv'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
@@ -318,7 +318,7 @@ rule cfmedip_nbglm:
         path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats.tsv'
     output:
         fit=path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_nbglm.tsv',
-        model=path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_model_nbglm.Rds',
+        model=path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_model_nbglm.Rds'
     resources: cpus=1, mem_mb=30000, time_min='5-00:00:00'
     conda: 'conda_env/cfmedip_r.yml'
     shell:
@@ -340,7 +340,7 @@ rule run_QSEA:
 
 rule merge_QSEA_count:
     input:
-        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/qsea_count_{chrom}_output.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES],
+        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/qsea_count_{chrom}_output.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES]
     output:
         path_to_data + '/samples/{sample}/merged/QSEA/qsea_count_output.tsv'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
@@ -354,7 +354,7 @@ rule merge_QSEA_count:
 
 rule merge_QSEA_beta:
     input:
-        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/qsea_beta_{chrom}_output.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES],
+        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/qsea_beta_{chrom}_output.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES]
     output:
         path_to_data + '/samples/{sample}/merged/QSEA/qsea_beta_output.tsv'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
@@ -368,7 +368,7 @@ rule merge_QSEA_beta:
 
 rule merge_QSEA_QCStats:
     input:
-        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/QCStats_{chrom}_matrix.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES],
+        [path_to_data + '/samples/{{sample}}/merged/QSEA/by_chromosome/QCStats_{chrom}_matrix.tsv'.format(chrom=a) for a in MAJOR_HUMAN_CHROMOSOMES]
     output:
         path_to_data + '/samples/{sample}/merged/QSEA/QCStats_matrix.tsv'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
