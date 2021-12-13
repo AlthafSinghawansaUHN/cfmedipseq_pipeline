@@ -15,13 +15,13 @@ data:
     Justin_HN_Norm_cfDNA_PBL:
       cohort_name: Justin_HN_Norm_cfDNA_PBL
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_Justin_HN_Norm_cfDNA_PBL.csv
-      active: False
+      active: True
       bpattern: NNT
       barcodes: NULL
     OCTANE:
       cohort_name: OCTANE
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_OCTANE_Breast.csv
-      active: True
+      active: False
       bpattern: NULL
       barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
     test:
@@ -34,5 +34,5 @@ data:
       cohort_name: dummy
       samplesheet: /cluster/home/asinghaw/git/cfmedipseq_pipeline/dummyfiles/dummy_samplesheet.csv
       active: False
-      bpattern: NNT
-      barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+      bpattern: NULL
+      barcodes: NULL
