@@ -131,8 +131,8 @@ rule extract_barcodes:
         barcode_out_R1 = path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R1.fastq',
         barcode_out_R2 = path_to_data + '/samples/{sample}/libraries/lib_{lib}/fastq/extract_barcode_R2.fastq',
         outprefix = lambda wildcards, output: output.R1.split('_barcode_')[0],
-	    bpattern = b_pattern,
-	    blist = b_list
+        bpattern = b_pattern,
+        blist = b_list
     resources: cpus=1, mem_mb=16000, time_min='1-00:00:00'
     run:
 	    if params.bpattern is None:
