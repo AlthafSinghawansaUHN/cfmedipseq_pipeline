@@ -208,7 +208,7 @@ rule bam_to_sorted_bam:
 
 def get_libraries_of_sample(sample):
     filtered_table = get_all_samples()[get_all_samples().sample_name == sample]
-    return(list(set(filtered_table.library_index.to_list())))
+    return list(set(filtered_table.library_index.to_list()))
 
 rule merge_bam:
     input:
@@ -241,7 +241,6 @@ rule bam_markdup:
         bam=path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam',
         index=path_to_data + '/samples/{sample}/merged/bwa_mem/aligned.sorted.markdup.bam.bai'
     resources: cpus=1, mem_mb=8000, time_min='24:00:00'
-    resources: mem_mb=8000, time_min='72:00:00'
     shell:
         "samtools markdup -r {input} {output.bam} && samtools index {output.bam}"
 
