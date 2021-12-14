@@ -15,6 +15,8 @@ Key Anaconda package dependencies:
 - bwa (bioconda)
 - R packages: dplyr, data.table
 
+CountsReg R package not handled by Conda and will have to be hacked into the conda environment through an R install.packages() 
+
 ## Snakemake profiles
 
 For a guide on how to create a Snakemake profile for your cluster setup, see https://www.sichong.site/2020/02/25/snakemake-and-slurm-how-to-manage-workflow-with-resource-constraint-on-hpc/
@@ -23,6 +25,6 @@ Create a slurm_log directory when running snakemake to place log files based on 
 
 # Running
 
-Prior to running will require setting of environments on SLURM with `. setenvironment.sh`
+Prior to running will require setting of environments on SLURM with `. set_environment.sh`
 
 To run the pipeline on SLURM, submit the launch.sh file with `sbatch launch.sh`.
