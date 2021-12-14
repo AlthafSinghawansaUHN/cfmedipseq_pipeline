@@ -23,4 +23,6 @@ Create a slurm_log directory when running snakemake to place log files based on 
 
 # Running
 
+Prior to running will require setting of environments on SLURM with `. setenvironment.sh`
+
 To run the pipeline on SLURM, submit the launch.sh file with `sbatch launch.sh`.
