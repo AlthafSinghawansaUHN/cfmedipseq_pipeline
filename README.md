@@ -15,7 +15,7 @@ Key Anaconda package dependencies:
 - bwa (bioconda)
 - R packages: dplyr, data.table
 
-CountsReg R package not handled by Conda and will have to be hacked into the conda environment through an R install.packages() 
+CountsReg R package not handled by Conda and will have to be hacked into the conda environment through R install.packages() 
 
 ## Snakemake profiles
 
