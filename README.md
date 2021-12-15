@@ -23,6 +23,8 @@ For a guide on how to create a Snakemake profile for your cluster setup, see htt
 
 Create a slurm_log directory when running snakemake to place log files based on the out location of the config.yaml, example config.yaml is provided as snakemake_slurm_config.yaml
 
+place the config.yaml file withing /cluster/home/username/.config/snakemake/slurm
+
 # Running
 
 Prior to running will require setting of environments on SLURM with `bash set_environment.sh`
