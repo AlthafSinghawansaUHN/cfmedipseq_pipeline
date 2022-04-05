@@ -2,37 +2,88 @@ paths:
   dependencies:
     conda_env: pipeline-cfMeDIP-core
     medestrand_path: /cluster/home/asinghaw/git/MeDEStrand
-  bwa: /cluster/home/asinghaw/software/conda/envs/pipeline-cfMeDIP-core/bin/bwa
-  bwa_index: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/BWA_index/hg38_arabidopsis_chr_1_3.fa
-  samtools: /cluster/home/asinghaw/software/conda/envs/pipeline-cfMeDIP-core/bin/samtools
-  genome: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/hg38_arabidopsis_chr_1_3.fa
-  bsgenome:
-    human: BSgenome.Hsapiens.UCSC.hg38
-    arabidopsis: BSgenome.Athaliana.TAIR.TAIR9
+    extract_barcodes_path: /cluster/home/asinghaw/git/cfmedipseq_pipeline/src/ConsensusCruncher/ConsensusCruncher/extract_barcodes.py
 data:
   base_path: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline
+  
+  # Excluded Cases:
+  # Any cases listed here will be excluded from analysis. The IDs must correspond
+  # to the sample_name column of the samplesheet.
+  excluded_cases:
+  # - example_case_id_1
+  # - example_case_id_2
+  
+  defaults:
+    genome: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/hg38_arabidopsis_chr_1_3.fa
+    bwa_index: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/BWA_index/hg38_arabidopsis_chr_1_3.fa
+    bsgenome:
+      human: BSgenome.Hsapiens.UCSC.hg38
+      arabidopsis: BSgenome.Athaliana.TAIR.TAIR9
+    chromosomes:
+      human: 'chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22'
+      arabidopsis: '1,3'
+    barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+    bpattern: NULL
+    paired: True
+    trimgalore: '--clip_R1 10 --clip_R2 10'
   cohorts:
     Justin_HN_Norm_cfDNA_PBL:
-      cohort_name: Justin_HN_Norm_cfDNA_PBL
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_Justin_HN_Norm_cfDNA_PBL.csv
-      active: True
-      bpattern: NNT
-      barcodes: NULL
-    OCTANE:
-      cohort_name: OCTANE
-      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_OCTANE_Breast.csv
       active: False
-      bpattern: NULL
-      barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+      settings:
+        bpattern: NNT
+        barcodes: NULL
+        paired: True
+        trimgalore: '--illumina'
+    OCTANE:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_OCTANE_Breast.csv
+      active: True
+      setttings:
+        bpattern: NULL
+        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        paired: True
+        trimgalore: '--clip_R1 10 --clip_R2 10'
+    NickCheng_PreDiagnosis_BreastCancer_CancerFree_1:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_NickCheng_PreDiagnosis_BreastCancer_CancerFree_1.csv
+      active: False
+      setttings:
+        bpattern: NULL
+        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        paired: True
+        trimgalore: '--clip_R1 10 --clip_R2 10'
+    NickCheng_PreDiagnosis_BreastCancer_CancerFree_2:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_NickCheng_PreDiagnosis_BreastCancer_CancerFree_2.csv
+      active: False
+      setttings:
+        bpattern: NULL
+        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        paired: True
+        trimgalore: '--clip_R1 10 --clip_R2 10'
+    NickCheng_PreDiagnosis_BreastCancer_CancerFree_3:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_NickCheng_PreDiagnosis_BreastCancer_CancerFree_3.csv
+      active: False
+      setttings:
+        bpattern: NULL
+        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        paired: True
+        trimgalore: '--clip_R1 10 --clip_R2 10'
     test:
-      cohort_name: test
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_comparison_cfmedip_test.csv
       active: False
-      bpattern: NNT
-      barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+      settings:
+        bpattern: NNT
+        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+    Shen_Nature:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_ShenNature_SingleEnd_Breast_and_Normal.csv
+      active: False
+      settings:
+        bpattern: NULL
+        barcodes: NULL
+        paired: False
+        trimgalore: '--illumina'
     dummy:
-      cohort_name: dummy
       samplesheet: /cluster/home/asinghaw/git/cfmedipseq_pipeline/dummyfiles/dummy_samplesheet.csv
       active: False
-      bpattern: NULL
-      barcodes: NULL
+      settings:
+        bpattern: NULL
+        barcodes: NULL
