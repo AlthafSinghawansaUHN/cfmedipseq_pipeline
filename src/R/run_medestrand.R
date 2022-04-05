@@ -2,11 +2,12 @@
 Run MeDEStrand.
 
 Usage:
-    run_medestrand.R -b BAM -o OUTPUT [ -m MEDESTRAND ]
+    run_medestrand.R -b BAM -o OUTPUT -p PAIRED [ -m MEDESTRAND ]
 
 Options:
     -b --bam BAM                Path to input BAM file
     -o --output OUTPUT          Output path (RDS file)
+    -p --paired PAIRED          Sample is paired end or single end sqeuncing based on cohort
     -m --medestrand MEDESTRAND  Path to MeDEStrand Package
 ' -> doc
 
@@ -32,6 +33,7 @@ library(tidyverse)
 BIN_WIDTH = 300
 allmainchrs = paste0('chr', c(1:22))
 BSgenome = 'BSgenome.Hsapiens.UCSC.hg38'
+paired_val = (args[['paired']] == "True")
 
 methylset <- MeDEStrand.createSet(
     file = args[['bam']],
@@ -41,7 +43,7 @@ methylset <- MeDEStrand.createSet(
     shift = 0,
     window_size = BIN_WIDTH,
     chr.select = allmainchrs,
-    paired = T
+    paired = paired_val
 )
 
 CS = MeDEStrand.countCG(pattern='CG', refObj=methylset)

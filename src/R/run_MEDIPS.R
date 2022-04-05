@@ -2,12 +2,13 @@
 Run MEDIPS for counts and conduct MEDIPS QC.
 
 Usage:
-    run_MEDIPS.R -b BAM -o OUTPUT -q QCOUT 
+    run_MEDIPS.R -b BAM -o OUTPUT -q QCOUT -p PAIRED
 
 Options:
     -b --bam BAM                Path to input BAM file
     -o --output OUTPUT          Output path (RDS file)
-    -q --qcout QCOUT           Path to output QC results of sample
+    -q --qcout QCOUT            Path to output QC results of sample
+    -p --paired PAIRED          Sample is paired end or single end sqeuncing based on cohort
 ' -> doc
 
 if (! interactive()) {
@@ -28,6 +29,7 @@ library(tidyverse)
 BIN_WIDTH = 300
 allmainchrs = paste0('chr', c(1:22))
 BSgenome = 'BSgenome.Hsapiens.UCSC.hg38'
+paired_val = (args[['paired']] == "True")
 
 medips_set = MEDIPS.createSet(file = args[['bam']],
                                      BSgenome = BSgenome,
@@ -35,7 +37,7 @@ medips_set = MEDIPS.createSet(file = args[['bam']],
                                      shift = 0,
                                      uniq = 1,
                                      window_size = BIN_WIDTH,
-                                     paired = TRUE,
+                                     paired = paired_val,
                                      chr.select = allmainchrs)
 
 chr.select = medips_set@chr_names
@@ -43,7 +45,7 @@ window_size = window_size(medips_set)
 chr_lengths = unname( seqlengths(BSgenome.Hsapiens.UCSC.hg38)[ seqnames(BSgenome.Hsapiens.UCSC.hg38@seqinfo)%in%chr.select ] )
 no_chr_windows = ceiling(chr_lengths/window_size)
 supersize_chr = cumsum(no_chr_windows)
-chromosomes=chr.select
+chromosomes = chr.select
 
 all.Granges.genomeVec = MEDIPS.GenomicCoordinates(supersize_chr, no_chr_windows, chromosomes, chr_lengths, window_size)
 all.Granges.genomeVec$counts = medips_set@genome_count
@@ -61,7 +63,7 @@ medipsenrichment <- tryCatch({
                                        extend = 0,
                                        shift = 0,
                                        uniq = 1,
-                                       paired = TRUE,
+                                       paired = paired_val,
                                        chr.select = allmainchrs)
   return(TRUE)
 }, error = function(e){
@@ -76,7 +78,7 @@ medips_coverage = MEDIPS.seqCoverage(file = args[['bam']],
                                      extend = 0,
                                      shift = 0,
                                      uniq = 1,
-                                     paired = TRUE,
+                                     paired = paired_val,
                                      chr.select = allmainchrs)
 
 medips_saturation = MEDIPS.saturation(file= args[['bam']],
@@ -90,7 +92,7 @@ medips_saturation = MEDIPS.saturation(file= args[['bam']],
                                       empty_bins = TRUE,
                                       rank = FALSE,
                                       chr.select = allmainchrs,
-                                      paired = TRUE)
+                                      paired = paired_val)
 
 #generating the seqCoverage just on the unique reads
 cov.level = c(0, 1, 2, 3, 4, 5)

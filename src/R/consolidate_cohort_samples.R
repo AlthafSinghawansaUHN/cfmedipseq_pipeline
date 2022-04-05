@@ -24,15 +24,15 @@ cohort_dir = args[['input']]
 
 ifelse(!dir.exists(args[['output']]),dir.create(args[['output']]),FALSE)
 
-setwd(paste(cohort_dir,"/samples",sep=""))
+setwd(cohort_dir)
 
-sample_list <- list.dirs(full.names = FALSE, recursive = FALSE)
+file_list <- list.files(pattern = "_output.tsv")
 
 if(args[['data']] == "MEDIPS"){
   i <- 0
-  for(sample in sample_list){
-    medips_file <- paste(cohort_dir,"/samples/",sample,"/merged/MEDIPS/medips_output.tsv", sep = "")
-    medips_counts <- read_tsv(medips_file, col_types='ciiid')
+  for(file in file_list){
+    sample <- separate(data.frame(filename = file),col = filename, into = c("sample", "extra"), sep = "\\.")$sample
+    medips_counts <- read_tsv(file, col_types='ciiid')
     
     if(i == 0){
       complete_counts <- data.frame(
@@ -64,9 +64,10 @@ if(args[['data']] == "MEDIPS"){
 
 if(args[['data']] == "MeDEStrand"){
   i <- 0
-  for(sample in sample_list){
-    medestrand_file <- paste(cohort_dir,"/samples/",sample,"/merged/MeDEStrand/medestrand_output.tsv", sep = "")
-    medestrand_meth <- read_tsv(medestrand_file, col_types='ciiid')
+  for(file in file_list){
+    medestrand_meth <- read_tsv(file, col_types='ciiid')
+    
+    sample <- separate(data.frame(filename = file),col = filename, into = c("sample", "extra"), sep = "\\.")$sample
     
     if(i == 0){
       complete_meth <- data.frame(
