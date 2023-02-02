@@ -1,9 +1,0 @@
-jobs: 300
-latency-wait: 60
-max-jobs-per-second: 1
-restart-times: 2
-rerun-incomplete: True
-keep-going: True
-cluster: "sbatch -p {resources.partition} -t {resources.time_min} --mem={resources.mem_mb} -c {resources.cpus} -j {rule}_{wildcards.sample}_job -o slurm_log/{rule}_{wildcards.sample}_out -e slurm_log/{rule}_{wildcards.sample}_err --mail-type=FAIL --mail-user=althaf.singhawansa@uhnresearch.ca"
-use-conda: true
-default-resources: [partition='all', cpus=1, mem_mb=2000, time_min=60]
