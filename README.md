@@ -21,7 +21,7 @@ CountsReg R package not handled by Conda and will have to be hacked into the con
 
 For a guide on how to create a Snakemake profile for your cluster setup, see https://www.sichong.site/2020/02/25/snakemake-and-slurm-how-to-manage-workflow-with-resource-constraint-on-hpc/
 
-Create a slurm_log directory when running snakemake to place log files based on the out location of the config.yaml, example config.yaml is provided as snakemake_slurm_config.yaml
+Create a slurm_log directory when running snakemake to place log files based on the out location of the config.yaml, example config.yaml is provided as slurm/config.yaml
 
 place the config.yaml file withing /cluster/home/username/.config/snakemake/slurm
 
