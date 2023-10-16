@@ -11,9 +11,6 @@ Key Anaconda package dependencies:
 - mamba (conda-forge)
 - snakemake (bioconda)
 - picard (bioconda)
-- samtools (bioconda)
-- bwa (bioconda)
-- R packages: dplyr, data.table
 
 ## Snakemake profiles
 
