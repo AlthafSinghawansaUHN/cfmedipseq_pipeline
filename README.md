@@ -25,6 +25,9 @@ place the config.yaml file withing /cluster/home/username/.config/snakemake/slur
 
 # Running
 
+To run the pipeline you must activate a base conda environment containing the key anaconda dependencies, this is stored under the name "pipeline-cfMeDIP-core" 
+The launch.sh bash file sources conda to activate this using the env.sh bash file, so if you need to change path dependencies and names edit those files
+
 Prior to running will require setting of environments on SLURM with `bash set_environment.sh`
 
 To run the pipeline on SLURM, submit the launch.sh file with `sbatch launch.sh`.
