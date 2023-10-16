@@ -14,8 +14,11 @@ data:
   # - example_case_id_2
   
   defaults:
-    genome: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/hg38_arabidopsis_chr_1_3.fa
-    bwa_index: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/BWA_index/hg38_arabidopsis_chr_1_3.fa
+    # genome: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/hg38_arabidopsis_chr_1_3.fa
+    genome: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_BAC_F19K16_F24B22/hg38_BAC_F19K16_F24B22.fa
+    # bwa_index: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_arabidopsis_chr_1_3/BWA_index/hg38_arabidopsis_chr_1_3.fa
+    bwa_index: /cluster/projects/scottgroup/people/althaf/assets/reference/genomes/hg38_BAC_F19K16_F24B22/BWA_index/hg38_BAC_F19K16_F24B22.fa
+    bt2_index: /cluster/tools/data/genomes/human/hg38/iGenomes/Sequence/Bowtie2Index/genome
     bsgenome:
       human: BSgenome.Hsapiens.UCSC.hg38
       arabidopsis: BSgenome.Athaliana.TAIR.TAIR9
@@ -23,64 +26,88 @@ data:
       human: 'chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22'
       arabidopsis: '1,3'
     barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+    UMI: True
     bpattern: NULL
     paired: True
-    trimgalore: '--clip_R1 10 --clip_R2 10'
+    umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_1>^[ACGT]{3}T)" --bc-pattern2="(?P<umi_2>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3}T)"'
+    trimgalore: '-q 20 --stringency 3 --length 20'
+    trimmomatic: 'TRAILING:3 MINLEN:30 SLIDINGWINDOW:4:7'
+    bin_width: 300
+    extend_dist: 0
+    window_assets_dir: /cluster/projects/scottgroup/people/althaf/assets/gaps_filters
   cohorts:
     Justin_HN_Norm_cfDNA_PBL:
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_Justin_HN_Norm_cfDNA_PBL.csv
-      active: False
+      active: True
       settings:
+        UMI: True
         bpattern: NNT
         barcodes: NULL
         paired: True
-        trimgalore: '--illumina'
+        umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^.{2})(?P<discard_1>T)" --bc-pattern2="(?P<umi_2>^.{2})(?P<discard_2>T)"'
+        trimgalore: '--illumina -q 20 --stringency 3 --length 20'
     OCTANE:
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_OCTANE_Breast.csv
       active: True
       setttings:
-        bpattern: NULL
-        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        UMI: True
         paired: True
-        trimgalore: '--clip_R1 10 --clip_R2 10'
+        umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_1>^[ACGT]{3}T)" --bc-pattern2="(?P<umi_2>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3}T)"'
+        trimgalore: '-q 20 --stringency 3 --length 20'
+    OCTANE_2:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_OCTANE_2_Breast.csv
+      active: True
+      setttings:
+        UMI: True
+        paired: True
+        umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_1>^[ACGT]{3}T)" --bc-pattern2="(?P<umi_2>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3}T)"'
+        trimgalore: '-q 20 --stringency 3 --length 20'
     NickCheng_PreDiagnosis_BreastCancer_CancerFree_1:
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_NickCheng_PreDiagnosis_BreastCancer_CancerFree_1.csv
-      active: False
+      active: True
       setttings:
-        bpattern: NULL
-        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        UMI: True
         paired: True
-        trimgalore: '--clip_R1 10 --clip_R2 10'
+        umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_1>^[ACGT]{3}T)" --bc-pattern2="(?P<umi_2>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3}T)"'
+        trimgalore: '-q 20 --stringency 3 --length 20'
     NickCheng_PreDiagnosis_BreastCancer_CancerFree_2:
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_NickCheng_PreDiagnosis_BreastCancer_CancerFree_2.csv
-      active: False
+      active: True
       setttings:
-        bpattern: NULL
-        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        UMI: True
         paired: True
-        trimgalore: '--clip_R1 10 --clip_R2 10'
+        umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_1>^[ACGT]{3}T)" --bc-pattern2="(?P<umi_2>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3}T)"'
+        trimgalore: '-q 20 --stringency 3 --length 20'
     NickCheng_PreDiagnosis_BreastCancer_CancerFree_3:
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_NickCheng_PreDiagnosis_BreastCancer_CancerFree_3.csv
+      active: True
+      setttings:
+        UMI: True
+        paired: True
+        umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_1>^[ACGT]{3}T)" --bc-pattern2="(?P<umi_2>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3}T)"'
+        trimgalore: '-q 20 --stringency 3 --length 20'
+    Shen_Nature:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_ShenNature_SingleEnd_Breast_and_Normal.csv
+      active: True
+      settings:
+        UMI: False
+        paired: False
+        trimgalore: '--illumina -q 20 --stringency 3 --length 20'
+    SMART_AML_2:
+      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_SMART_AML_2.csv
       active: False
       setttings:
-        bpattern: NULL
-        barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
+        UMI: True
         paired: True
-        trimgalore: '--clip_R1 10 --clip_R2 10'
+        umi_tools: '--extract-method=regex --bc-pattern="(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_1>^[ACGT]{3}T)" --bc-pattern2="(?P<umi_2>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3}T)"'
+        trimgalore: '-q 20 --stringency 3 --length 20'
     test:
       samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_comparison_cfmedip_test.csv
       active: False
       settings:
         bpattern: NNT
         barcodes: /cluster/projects/scottgroup/people/althaf/assets/reference/barcodes/barcode_idt.txt
-    Shen_Nature:
-      samplesheet: /cluster/projects/scottgroup/people/althaf/pipelines/cfmedipseq_pipeline/input/cohorts/samplesheet_ShenNature_SingleEnd_Breast_and_Normal.csv
-      active: False
-      settings:
-        bpattern: NULL
-        barcodes: NULL
-        paired: False
-        trimgalore: '--illumina'
+
     dummy:
       samplesheet: /cluster/home/asinghaw/git/cfmedipseq_pipeline/dummyfiles/dummy_samplesheet.csv
       active: False
