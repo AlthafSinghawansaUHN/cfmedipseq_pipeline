@@ -143,10 +143,10 @@ rule all:
             cohort = get_active_cohorts()
         ),
         # Run Consolidated MeDEStrand
-        expand(
-            path_to_data + '/{cohort}/results/MeDEStrand/consolidated/MeDEStrand_AbsMethyl.tsv',
-            cohort = get_active_cohorts()
-        ),
+        #expand(
+        #    path_to_data + '/{cohort}/results/MeDEStrand/consolidated/MeDEStrand_AbsMethyl.tsv',
+        #    cohort = get_active_cohorts()
+        #),
         #run MeD-ReMix
         #expand(
         #    path_to_data + '/samples/{sample}/merged/bin_stats/bin_stats_fit_nbglm.tsv',
