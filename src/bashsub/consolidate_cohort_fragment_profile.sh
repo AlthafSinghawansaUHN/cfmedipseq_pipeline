@@ -1,0 +1,24 @@
+#!/bin/sh
+#$ -cwd
+
+#SBATCH -p all
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH -J Consolidate_Fragment_Profile
+#SBATCH --mem=30G
+#SBATCH -t 8:00:00
+#SBATCH -o slurm.%x.%N.%j.out
+#SBATCH -e slurm.%x.%N.%j.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=althaf.singhawansa@uhnresearch.ca
+
+outDir=$1
+dataDir=$2
+windowName=$3
+
+[ ! -d $outDir ] && mkdir $outDir
+
+#module load R
+source ~/software/conda/bin/activate cfmedip_r
+
+Rscript /cluster/home/asinghaw/git/cfmedipseq_pipeline/src/bashsub/consolidate_cohort_fragment_profile.R  -o $outDir -d $dataDir -n $windowName

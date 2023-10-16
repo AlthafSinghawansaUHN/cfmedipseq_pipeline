@@ -7,7 +7,7 @@
 #SBATCH --mem=8G
 #SBATCH -t 24:00:00
 #SBATCH	-o slurm.%N.%j.out
-#SBATCH	-o slurm.%N.%j.err
+#SBATCH	-e slurm.%N.%j.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=althaf.singhawansa@uhnresearch.ca
 

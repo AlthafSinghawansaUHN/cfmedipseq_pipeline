@@ -5,7 +5,6 @@ library(ggplot2)
 library(reshape2)
 
 ## For future work I can just simply change the inDir
-## RCC Cohort
 
 inDir=args[1]
 
@@ -58,7 +57,7 @@ cohort_IS_table[i+1,2] <- sum(cohort_IS_table[1:i,2])/i
 cohort_IS_table[i+1,3] <- sum(cohort_IS_table[1:i,3])/i
 cohort_IS_table[i+1,4] <- sum(cohort_IS_table[1:i,4])/i
 
-write.table(cohort_IS_table, file = "cohort_IS_table.txt", sep = "\t", col.names = TRUE, quote = FALSE)
+write.table(cohort_IS_table, file = "cohort_IS_table.txt", sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
 
 rm(list=ls())
 gc()
