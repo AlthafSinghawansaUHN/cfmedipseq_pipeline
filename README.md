@@ -32,6 +32,8 @@ $ mamba env create --file conda_env.yaml
 
 The launch.sh and set environment bash files sources conda to activate this using the env.sh bash file, so if you need to change path dependencies and names edit those files
 
+Remember to edit the config.yml file so that it references your paths, documents, and settings.
+
 Prior to running will require setting of environments on SLURM with `bash set_environment.sh`
 
 To run the pipeline on SLURM, submit the launch.sh file with `sbatch launch.sh`.
