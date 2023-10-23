@@ -13,6 +13,8 @@ Key Anaconda package dependencies:
 
 Example environment is provided as conda_env.yaml
 
+If MeDEStrand is to be run, it must be installed separately and a reference path is required in the config.yml file.
+
 ## Snakemake profiles
 
 For a guide on how to run a Snakemake for your cluster, see [https://www.sichong.site/2020/02/25/snakemake-and-slurm-how-to-manage-workflow-with-resource-constraint-on-hpc/](https://www.sichong.site/workflow/2019/10/17/how-to-run-snakemake-pipeline-on-hpc.html)
