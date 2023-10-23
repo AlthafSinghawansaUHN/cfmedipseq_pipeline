@@ -13,7 +13,7 @@ Key Anaconda package dependencies:
 
 Example environment is provided as conda_env.yaml
 
-If MeDEStrand is to be run, it must be installed separately and a reference path is required in the config.yml file.
+If MeDEStrand or ConsensusCruncher ectract barcodes, is to be run, it must be installed separately and a reference path is required in the config.yml file.
 
 ## Snakemake profiles
 
