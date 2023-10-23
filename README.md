@@ -32,7 +32,7 @@ $ mamba env create --file conda_env.yaml
 
 The launch.sh and set environment bash files sources conda to activate this using the env.sh bash file, so if you need to change path dependencies and names edit those files
 
-Remember to edit the config.yml file so that it references your paths, documents, and settings.
+Remember to edit the config.yml file so that it references your paths, documents, and settings, and to edit the default .sh files in the main directory to reference your files, email, and cluster setup.
 
 Prior to running will require setting of environments on SLURM with `bash set_environment.sh`
 
