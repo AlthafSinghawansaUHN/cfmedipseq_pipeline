@@ -15,7 +15,7 @@ Example environment is provided as conda_env.yaml
 
 ## Snakemake profiles
 
-For a guide on how to create a Snakemake profile for your cluster setup, see https://www.sichong.site/2020/02/25/snakemake-and-slurm-how-to-manage-workflow-with-resource-constraint-on-hpc/
+For a guide on how to create a Snakemake profile for your cluster setup, see [https://www.sichong.site/2020/02/25/snakemake-and-slurm-how-to-manage-workflow-with-resource-constraint-on-hpc/](https://www.sichong.site/workflow/2019/10/17/how-to-run-snakemake-pipeline-on-hpc.html)
 
 Create a slurm_log directory when running snakemake to place log files based on the out location of the config.yaml, example config.yaml is provided as slurm/config.yaml
 
