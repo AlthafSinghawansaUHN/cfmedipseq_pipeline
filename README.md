@@ -8,7 +8,6 @@ The only up-front dependency is Anaconda.
 Key Anaconda package dependencies:
 
 - pyyaml
-- mamba (conda-forge)
 - snakemake (bioconda)
 - picard (bioconda)
 
