@@ -19,15 +19,16 @@ For a guide on how to create a Snakemake profile for your cluster setup, see htt
 
 Create a slurm_log directory when running snakemake to place log files based on the out location of the config.yaml, example config.yaml is provided as slurm/config.yaml
 
-place the config.yaml file withing /cluster/home/username/.config/snakemake/slurm
+place the config.yaml file within /cluster/home/username/.config/snakemake/slurm
 
 # Running
 
-To run the pipeline you must activate a base conda environment containing the key anaconda dependencies, this is stored under the name "pipeline-cfMeDIP-core", if you want to use the same name and environement it can be done so by installing that environment using
+To run the pipeline you must activate a base conda environment containing the key anaconda dependencies, this is stored under the name "pipeline-cfMeDIP-core", if you want to use the same name and environement it can be done so by installing that environment using the following while in the install location
 
-$ cd MEDIPIPE
+```
 $ conda activate base
 $ mamba env create --file conda_env.yaml
+```
 
 The launch.sh and set environment bash files sources conda to activate this using the env.sh bash file, so if you need to change path dependencies and names edit those files
 
