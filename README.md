@@ -36,4 +36,6 @@ Remember to edit the config.yml file so that it references your paths, documents
 
 Prior to running will require setting of environments on SLURM with `bash set_environment.sh`
 
-To run the pipeline on SLURM, submit the launch.sh file with `sbatch launch.sh`.
+To run the pipeline on SLURM using the default profile I provided and if setup correctly, submit the launch.sh file with `sbatch launch.sh`.
+
+If profile was not setup, utilize the commented out snakemake command in launch.sh as a template for creating your own snakemake default submission.
