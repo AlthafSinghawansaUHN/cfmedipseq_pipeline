@@ -1,0 +1,13 @@
+name: pipeline-cfMeDIP-core
+channels:
+  - anaconda
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - snakemake=6.12.3
+  - samtools=1.17
+  - graphviz=2.40.1
+  - picard=2.26.6
+  - python=3.9.7
+  - pyyaml=5.4.1
